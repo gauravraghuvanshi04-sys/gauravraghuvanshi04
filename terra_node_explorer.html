@@ -1,3 +1,9 @@
+<nav>
+  <a href="index.html">Journey</a>
+  <a href="terra_node_explorer.html">Node</a>
+</nav>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -136,11 +142,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
 </style>
-<link rel="stylesheet" href="terra_shared.css"/>
 </head>
 <body>
-<div class="app resizable-app">
-  <header class="header resizable-header">
+<div class="app">
+  <header class="header">
     <div class="logo">
       <div class="logo-mark">
         <svg viewBox="0 0 14 14"><path d="M7 1L13 4V10L7 13L1 10V4L7 1Z"/></svg>
@@ -148,7 +153,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
       <span class="logo-title">Terra</span>
       <span class="logo-sub">Journey Node Explorer</span>
     </div>
-    <div class="top-nav-wrap"><nav class="top-nav"><a href="index.html">Node</a><a href="terra_node_explorer.html" class="active">Journey Node Explorer</a></nav></div>
     <div class="header-right">
       <span class="hbadge">26 nodes</span>
       <span class="hbadge">8 journey layers</span>
@@ -156,14 +160,12 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
     </div>
   </header>
 
-  <div class="panels resizable-panels" id="resizable-panels">
+  <div class="panels">
     <!-- Left: journey list -->
     <div class="panel-left">
       <div class="panel-left-header"><h3>Journeys</h3></div>
       <div class="journey-list" id="journey-list"></div>
     </div>
-
-    <div class="resize-handle" id="left-resizer" aria-hidden="true"></div>
 
     <!-- Middle: flow diagram -->
     <div class="panel-mid">
@@ -174,8 +176,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
       </div>
       <div class="flow-scroll" id="flow-scroll"></div>
     </div>
-
-    <div class="resize-handle" id="right-resizer" aria-hidden="true"></div>
 
     <!-- Right: schema detail -->
     <div class="panel-right" id="panel-right">
