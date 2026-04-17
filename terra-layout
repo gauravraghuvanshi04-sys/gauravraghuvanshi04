@@ -1,0 +1,313 @@
+/* Terra layout overrides
+   Add this AFTER the existing inline <style> block in your HTML.
+   Works for both terra_node_explorer.html and index.html.
+*/
+
+:root{
+  --terra-left-panel: clamp(240px, 16vw, 320px);
+  --terra-right-panel: clamp(360px, 25vw, 500px);
+  --terra-main-min: 720px;
+  --terra-header-height: 64px;
+  --terra-font-base: 15px;
+  --terra-font-small: 13px;
+  --terra-font-title: 18px;
+  --terra-font-heading: 28px;
+  --terra-line-copy: 1.65;
+}
+
+html, body{
+  font-size: var(--terra-font-base);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ---------- File 1: terra_node_explorer.html ---------- */
+.app{
+  grid-template-rows: var(--terra-header-height) 1fr;
+}
+
+.header{
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  min-height: var(--terra-header-height);
+  padding: 0 20px;
+  gap: 12px;
+}
+
+.logo{
+  grid-column: 2;
+  justify-self: center;
+  gap: 12px;
+}
+
+.header-right{
+  grid-column: 3;
+  justify-self: end;
+  margin-left: 0;
+  flex-wrap: wrap;
+}
+
+.logo-title{
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.logo-sub{
+  font-size: 14px;
+  color: var(--text2);
+}
+
+.hbadge{
+  font-size: 11px;
+  padding: 5px 10px;
+}
+
+.panels{
+  grid-template-columns: var(--terra-left-panel) minmax(var(--terra-main-min), 1fr) var(--terra-right-panel);
+}
+
+.panel-left-header{
+  padding: 16px 16px 10px;
+}
+
+.panel-left-header h3,
+.sub-label,
+.section-label,
+.schema-journey-tag,
+.node-id{
+  font-size: 11px;
+}
+
+.journey-list{
+  padding: 10px 8px;
+}
+
+.journey-btn{
+  padding: 10px 12px;
+  border-radius: 10px;
+}
+
+.jbtn-name{
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.jbtn-count{
+  font-size: 11px;
+}
+
+.panel-mid-header{
+  padding: 16px 24px 14px;
+  gap: 12px;
+}
+
+.journey-badge{
+  font-size: 13px;
+  padding: 6px 12px;
+}
+
+.journey-desc,
+.node-count{
+  font-size: 13px;
+}
+
+.flow-scroll{
+  padding: 20px 24px 28px;
+}
+
+.node-card{
+  padding: 14px 16px;
+  border-radius: 14px;
+}
+
+.node-name{
+  font-size: 18px;
+  font-weight: 650;
+  line-height: 1.4;
+  margin-top: 3px;
+}
+
+.type-chip,
+.reentry-tag{
+  font-size: 11px;
+  padding: 2px 8px;
+}
+
+.node-preview,
+.section-content,
+.conn-item,
+.loop-box,
+.gap-box{
+  font-size: 14px;
+  line-height: var(--terra-line-copy);
+}
+
+.panel-right{
+  min-width: 0;
+}
+
+.schema-header{
+  padding: 20px;
+}
+
+.schema-title{
+  font-size: 32px;
+  line-height: 1.22;
+  font-weight: 700;
+}
+
+.schema-id{
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+.schema-chip{
+  font-size: 11px;
+  padding: 4px 10px;
+}
+
+.schema-section{
+  padding: 14px 20px;
+}
+
+.kpi-tag,
+.ts-tag,
+.flag-tag{
+  font-size: 12px;
+  padding: 4px 9px;
+}
+
+/* ---------- File 2: index.html ---------- */
+.shell{
+  max-width: min(1400px, calc(100vw - 48px));
+  padding: 28px 24px 56px;
+}
+
+.masthead{
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.masthead h1{
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.masthead p{
+  font-size: 14px;
+  line-height: 1.6;
+  margin-top: 6px;
+}
+
+.tabs{
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 14px;
+  margin-bottom: 18px;
+}
+
+.tab-btn{
+  padding: 10px 18px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 12px;
+}
+
+.jchip{
+  min-width: 120px;
+  padding: 10px 12px;
+}
+
+.ntag,
+.pill,
+.schema-label,
+.schema-val,
+.nc,
+.par-band{
+  font-size: 14px;
+}
+
+.schema-label{
+  width: 150px;
+  min-width: 150px;
+}
+
+.nc{
+  padding: 14px 16px;
+  border-radius: 12px;
+}
+
+.node-grid{
+  grid-template-columns: repeat(2, minmax(320px, 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 1200px){
+  .panels{
+    grid-template-columns: clamp(220px, 22vw, 300px) minmax(0, 1fr) clamp(320px, 32vw, 420px);
+  }
+}
+
+@media (max-width: 980px){
+  .header{
+    grid-template-columns: 1fr;
+    justify-items: center;
+    padding: 12px 16px;
+    height: auto;
+  }
+
+  .logo,
+  .header-right{
+    grid-column: auto;
+    justify-self: center;
+  }
+
+  .panels{
+    grid-template-columns: 220px minmax(0, 1fr);
+  }
+
+  .panel-right{
+    display: none;
+  }
+
+  .node-grid{
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px){
+  :root{
+    --terra-main-min: 0px;
+  }
+
+  .shell{
+    max-width: 100%;
+    padding: 20px 16px 40px;
+  }
+
+  .masthead h1{
+    font-size: 22px;
+  }
+
+  .tabs{
+    gap: 8px;
+  }
+
+  .tab-btn{
+    width: 100%;
+    justify-content: center;
+  }
+
+  .panels{
+    grid-template-columns: 1fr;
+  }
+
+  .panel-left{
+    display: none;
+  }
+}
