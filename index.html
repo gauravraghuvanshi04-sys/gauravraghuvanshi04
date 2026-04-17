@@ -1,89 +1,36 @@
+
 <nav>
   <a href="index.html">Journey</a>
   <a href="terra_node_explorer.html">Node</a>
 </nav>
 
-<div class="app-layout">
-  <aside class="left-panel">
-    <!-- left sidebar -->
-  </aside>
-
-  <main class="main-panel">
-    <!-- main content -->
-  </main>
-
-  <aside class="right-panel">
-    <!-- right detail panel -->
-  </aside>
-</div>
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Terra Journey Node Explorer</title>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #ffffff; --bg2: #f5f4f0; --bg3: #eeede9;
-    --text: #1c1c1a; --text2: #5f5e5a; --text3: #888780;
-    --border: rgba(0,0,0,0.12); --border2: rgba(0,0,0,0.22);
-    --radius: 8px; --radius-lg: 12px;
-    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #1c1c1a; --bg2: #252523; --bg3: #2e2e2b;
-      --text: #e8e6de; --text2: #9c9a92; --text3: #6b6a63;
-      --border: rgba(255,255,255,0.1); --border2: rgba(255,255,255,0.2);
-    }
-  }
-  body { font-family: var(--font); background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; min-height: 100vh; }
-  .shell { max-width: 860px; margin: 0 auto; padding: 24px 20px 48px; }
-  .masthead { margin-bottom: 20px; }
-  .masthead h1 { font-size: 18px; font-weight: 500; }
-  .masthead p  { font-size: 12px; color: var(--text2); margin-top: 3px; }
-  .tabs { display: flex; gap: 4px; margin-bottom: 14px; border-bottom: 0.5px solid var(--border); padding-bottom: 10px; flex-wrap: wrap; }
-  .tab-btn { padding: 5px 14px; font-size: 12px; border-radius: var(--radius); border: 0.5px solid transparent; cursor: pointer; background: transparent; color: var(--text2); font-family: var(--font); transition: all 0.12s; }
-  .tab-btn.on { background: var(--bg2); border-color: var(--border2); color: var(--text); font-weight: 500; }
-  .tab-btn:hover:not(.on) { background: var(--bg2); }
-  .jchip { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px 10px; border-radius: var(--radius); cursor: pointer; min-width: 100px; transition: box-shadow 0.15s, transform 0.12s; user-select: none; border: 1.5px solid transparent; }
-  .jchip:hover { transform: translateY(-1px); }
-  .jchip.active { box-shadow: 0 0 0 2.5px currentColor; }
-  .arr { display: flex; align-items: center; color: var(--text2); font-size: 14px; padding: 0 4px; flex-shrink: 0; }
-  .ntag { display: inline-block; font-size: 10px; font-weight: 500; padding: 2px 7px; border-radius: 4px; cursor: pointer; transition: opacity 0.1s; border: 1px solid transparent; }
-  .ntag:hover { opacity: 0.8; }
-  .ntag.active { border-color: currentColor; }
-  .pill { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 12px; margin: 2px; line-height: 1.5; }
-  .schema-row { display: flex; gap: 0; border-bottom: 0.5px solid var(--border); }
-  .schema-row:last-child { border-bottom: none; }
-  .schema-label { font-size: 11px; font-weight: 500; width: 130px; min-width: 130px; padding: 8px 10px 8px 0; color: var(--text2); flex-shrink: 0; }
-  .schema-val { font-size: 12px; padding: 8px 0; color: var(--text); line-height: 1.6; flex: 1; }
-  .nc { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 10px 12px; cursor: pointer; transition: border-color 0.12s; }
-  .nc:hover { border-color: var(--border2); }
-  .nc.on { border-width: 1.5px; }
-  .par-band { border-radius: var(--radius); padding: 7px 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; margin-bottom: 4px; border: 1px solid transparent; transition: opacity 0.12s; }
-  .par-band:hover { opacity: 0.85; }
-  .par-band.on { border-color: currentColor; }
-  .node-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
-  @media (max-width: 560px) { .node-grid { grid-template-columns: 1fr; } .jchip { min-width: 80px; } }
-  .timeline-bar { background: var(--bg2); border-radius: 4px; height: 8px; margin: 12px 0; position: relative; overflow: hidden; }
-  .timeline-dot { position: absolute; top: 0; height: 100%; width: 3px; transform: translateX(-50%); }
-  .trace-step { position: relative; padding-left: 16px; padding-bottom: 20px; }
-  .trace-step:last-child { padding-bottom: 0; }
-  .trace-connector { position: absolute; left: 5px; top: 16px; width: 1px; height: calc(100% - 4px); background: var(--border); }
-  .trace-dot { position: absolute; left: 0; top: 4px; width: 11px; height: 11px; border-radius: 50%; }
+.jchip{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 10px;border-radius:8px;cursor:pointer;min-width:88px;transition:box-shadow 0.15s,transform 0.12s;user-select:none;border:1.5px solid transparent}
+.jchip:hover{transform:translateY(-1px)}
+.jchip.active{box-shadow:0 0 0 2.5px currentColor}
+.arr{display:flex;align-items:center;color:var(--color-text-secondary);font-size:14px;padding:0 4px;flex-shrink:0}
+.ntag{display:inline-block;font-size:10px;font-weight:500;padding:2px 7px;border-radius:4px;cursor:pointer;transition:opacity 0.1s;border:1px solid transparent}
+.ntag:hover{opacity:0.8}
+.ntag.active{border-color:currentColor}
+.pill{display:inline-block;font-size:11px;padding:2px 8px;border-radius:12px;margin:2px;line-height:1.5}
+.schema-row{display:flex;gap:0;border-bottom:0.5px solid var(--color-border-tertiary)}
+.schema-row:last-child{border-bottom:none}
+.schema-label{font-size:11px;font-weight:500;width:130px;min-width:130px;padding:8px 10px 8px 0;color:var(--color-text-secondary);flex-shrink:0}
+.schema-val{font-size:12px;padding:8px 0;color:var(--color-text-primary);line-height:1.6;flex:1}
+.tab-btn{padding:5px 14px;font-size:12px;border-radius:6px;border:0.5px solid transparent;cursor:pointer;background:transparent;color:var(--color-text-secondary);transition:all 0.12s}
+.tab-btn.on{background:var(--color-background-secondary);border-color:var(--color-border-secondary);color:var(--color-text-primary);font-weight:500}
+.nc{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:8px;padding:10px 12px;cursor:pointer;transition:border-color 0.12s}
+.nc:hover{border-color:var(--color-border-secondary)}
+.nc.on{border-width:1.5px}
+.par-band{border-radius:6px;padding:7px 12px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;margin-bottom:4px;border:1px solid transparent;transition:opacity 0.12s}
+.par-band:hover{opacity:0.85}
+.par-band.on{border-color:currentColor}
 </style>
-</head>
-<body>
-<div class="shell">
-  <div class="masthead">
-    <h1>Terra Journey Node Explorer</h1>
-    <p>Perch · Terra Platform · All 8 journey layers · 26 nodes</p>
-  </div>
-  <div id="root"></div>
-</div>
+
+<h2 class="sr-only">Terra journey node explorer — interactive flow and schema browser</h2>
+
+<div id="root" style="padding:4px 0"></div>
+
 <script>
 const J={
   L:{id:"L",name:"Lead-to-Opp",abbrev:"L1–L4",color:"#2D6A4F",bg:"#E8F5F0",tc:"#1B4332",desc:"Lead creation through opp creation"},
@@ -299,9 +246,9 @@ function renderSchema(node){
         <span style="color:rgba(255,255,255,0.7);font-size:11px">${node.id} · ${j.name} Journey</span>
         <div style="color:#fff;font-size:15px;font-weight:500;margin-top:2px">${node.name}</div>
       </div>
-      <button onclick="closeSchema()" style="background:rgba(255,255,255,0.15);border:none;color:#fff;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:12px;font-family:inherit">✕ close</button>
+      <button onclick="closeSchema()" style="background:rgba(255,255,255,0.15);border:none;color:#fff;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:12px">✕ close</button>
     </div>
-    <div style="background:var(--bg);padding:0 14px">
+    <div style="background:var(--color-background-primary);padding:0 14px">
       ${rows.map(([l,v])=>`<div class="schema-row"><div class="schema-label">${l}</div><div class="schema-val">${v}</div></div>`).join("")}
     </div>
   </div>`;
@@ -315,12 +262,12 @@ function renderNodeCards(nodes){
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
         <div>
           <span style="font-size:10px;font-weight:500;color:${jc.color}">${n.id}</span>
-          <div style="font-size:13px;font-weight:500;margin-top:2px;color:var(--text)">${n.name}</div>
-          <div style="font-size:11px;color:var(--text2);margin-top:3px">${n.sub} · ${J[n.j].name}</div>
+          <div style="font-size:13px;font-weight:500;margin-top:2px;color:var(--color-text-primary)">${n.name}</div>
+          <div style="font-size:11px;color:var(--color-text-secondary);margin-top:3px">${n.sub} · ${J[n.j].name}</div>
         </div>
         <span class="pill" style="background:${jc.bg};color:${jc.tc};font-size:10px;white-space:nowrap">${n.j}</span>
       </div>
-      <div style="font-size:11px;color:var(--text2);margin-top:6px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${n.desc}</div>
+      <div style="font-size:11px;color:var(--color-text-secondary);margin-top:6px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${n.desc}</div>
     </div>`;
   }).join("");
 }
@@ -338,14 +285,14 @@ function renderArchTab(){
 
   const jA=J["A"]; const aOn=selJ==="A";
   const apptRow=`<div style="display:flex;align-items:center;gap:6px;margin-top:6px;padding-left:36px">
-    <div style="width:1px;height:24px;background:var(--border)"></div>
+    <div style="width:1px;height:24px;background:var(--color-border-tertiary)"></div>
     <div class="arr" style="transform:rotate(90deg)">→</div>
     <div class="jchip ${aOn?"active":""}" style="background:${jA.bg};color:${jA.tc};border-color:${aOn?jA.color:"transparent"};min-width:100px" onclick="selectJ('A')">
       <span style="font-size:10px;opacity:0.7">${jA.abbrev}</span>
       <span style="font-size:12px;font-weight:500;margin-top:2px">${jA.name}</span>
       <span style="font-size:10px;margin-top:1px;opacity:0.6">${NODES.filter(n=>n.j==="A").length} nodes</span>
     </div>
-    <div style="font-size:11px;color:var(--text2)">(branches from L4 · field visit or B2B meeting model)</div>
+    <div style="font-size:11px;color:var(--color-text-secondary)">(branches from L4 · field visit or B2B meeting model)</div>
   </div>`;
 
   const parallelRows=["D","W"].map(id=>{
@@ -367,19 +314,19 @@ function renderArchTab(){
       const on=selN&&selN.id===n.id;
       return `<span class="ntag ${on?"active":""}" style="background:${on?jm.color:jm.bg};color:${on?"#fff":jm.tc};border-color:${jm.color}" onclick="selectNode('${n.id}')">${n.name}</span>`;
     }).join("");
-    nodeSection=`<div style="margin-top:14px;padding:12px;background:var(--bg2);border-radius:8px;border:0.5px solid var(--border)">
-      <div style="font-size:11px;color:var(--text2);margin-bottom:8px">${jm.name} Journey · ${jNodes.length} nodes · click a node to see its schema</div>
+    nodeSection=`<div style="margin-top:14px;padding:12px;background:var(--color-background-secondary);border-radius:8px;border:0.5px solid var(--color-border-tertiary)">
+      <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:8px">${jm.name} Journey · ${jNodes.length} nodes · click a node to see its schema</div>
       <div style="display:flex;flex-wrap:wrap;gap:6px">${tags}</div>
     </div>`;
   }
 
   const schemaSection=selN?renderSchema(selN):"";
 
-  return `<div>
-    <div style="font-size:11px;color:var(--text2);margin-bottom:8px">Primary journey pipeline</div>
+  return `<div style="padding:0">
+    <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:8px">Primary journey pipeline</div>
     <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px">${chips}</div>
     ${apptRow}
-    <div style="font-size:11px;color:var(--text2);margin:12px 0 6px">Parallel layers (span all journeys)</div>
+    <div style="font-size:11px;color:var(--color-text-secondary);margin:12px 0 6px">Parallel layers (span all journeys)</div>
     ${parallelRows}
     ${nodeSection}
     ${schemaSection}
@@ -389,12 +336,14 @@ function renderArchTab(){
 function renderBrowseTab(){
   const filters=["all",...Object.keys(J)];
   const filterBtns=filters.map(f=>`<button class="tab-btn ${browseFilter===f?"on":""}" onclick="setFilter('${f}')">${f==="all"?"All journeys":J[f]?.name||f}</button>`).join("");
+  
   let visible=browseFilter==="all"?NODES:NODES.filter(n=>n.j===browseFilter);
-  const grid=`<div class="node-grid">${renderNodeCards(visible)}</div>`;
+  const grid=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">${renderNodeCards(visible)}</div>`;
   const schema=selN?renderSchema(selN):"";
+  
   return `<div>
     <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:4px">${filterBtns}</div>
-    <div style="font-size:11px;color:var(--text2);margin-bottom:8px">${visible.length} nodes · click any card to view full schema</div>
+    <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:8px">${visible.length} nodes · click any card to view full schema</div>
     ${grid}
     ${schema}
   </div>`;
@@ -413,26 +362,31 @@ function renderTraceTab(){
     {j:"R",id:"R3.ENTRY",label:"Realization",day:48,note:"True-up window passed. Revenue realized. No cancellation."},
   ];
   const totalDays=48;
-  const tlDots=trace.map(s=>`<div class="timeline-dot" style="left:${Math.round(s.day/totalDays*100)}%;background:${J[s.j].color}"></div>`).join("");
   const steps=trace.map((s,i)=>{
+    const pct=Math.round(s.day/totalDays*100);
     const jm=J[s.j];
-    return `<div class="trace-step">
-      ${i<trace.length-1?`<div class="trace-connector"></div>`:""}
-      <div class="trace-dot" style="background:${jm.color}"></div>
+    return `<div style="position:relative;padding-left:16px;padding-bottom:${i<trace.length-1?"20px":"0"}">
+      ${i<trace.length-1?`<div style="position:absolute;left:5px;top:16px;width:1px;height:calc(100% - 4px);background:var(--color-border-tertiary)"></div>`:""}
+      <div style="position:absolute;left:0;top:4px;width:11px;height:11px;border-radius:50%;background:${jm.color}"></div>
       <div style="display:flex;align-items:baseline;gap:8px">
         <span style="font-size:11px;font-weight:500;color:${jm.color}">${s.label}</span>
-        <span style="font-size:10px;color:var(--text2)">day ${s.day===0?"0":s.day}</span>
+        <span style="font-size:10px;color:var(--color-text-secondary)">day ${s.day===0?"0":s.day}</span>
         <span class="pill" style="background:${jm.bg};color:${jm.tc};font-size:9px">${s.j} journey</span>
       </div>
-      <div style="font-size:11px;color:var(--text2);margin-top:2px">${s.note}</div>
+      <div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px">${s.note}</div>
     </div>`;
   }).join("");
+
+  const timeline=`<div style="background:var(--color-background-secondary);border-radius:6px;height:8px;margin:12px 0;position:relative;overflow:hidden">
+    ${trace.map(s=>`<div style="position:absolute;top:0;height:100%;width:3px;left:${Math.round(s.day/totalDays*100)}%;background:${J[s.j].color};transform:translateX(-50%)"></div>`).join("")}
+  </div>
+  <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--color-text-secondary);margin-bottom:14px">
+    <span>Day 0 · Lead Created</span><span>Day 48 · Realized</span>
+  </div>`;
+
   return `<div>
-    <div style="font-size:11px;color:var(--text2);margin-bottom:6px">Example lifecycle trace — single lead through all journeys (illustrative timing)</div>
-    <div class="timeline-bar">${tlDots}</div>
-    <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text2);margin-bottom:14px">
-      <span>Day 0 · Lead Created</span><span>Day 48 · Realized</span>
-    </div>
+    <div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:6px">Example lifecycle trace — single lead through all journeys (illustrative timing)</div>
+    ${timeline}
     <div>${steps}</div>
   </div>`;
 }
@@ -440,23 +394,27 @@ function renderTraceTab(){
 function render(){
   const root=document.getElementById("root");
   const tabs=[["arch","Journey Architecture"],["browse","Node Schema Browser"],["trace","Lifecycle Trace"]];
-  const tabBar=`<div class="tabs">
+  const tabBar=`<div style="display:flex;gap:4px;margin-bottom:14px;border-bottom:0.5px solid var(--color-border-tertiary);padding-bottom:10px">
     ${tabs.map(([id,label])=>`<button class="tab-btn ${selTab===id?"on":""}" onclick="setTab('${id}')">${label}</button>`).join("")}
   </div>`;
+  
   let content="";
   if(selTab==="arch") content=renderArchTab();
   else if(selTab==="browse") content=renderBrowseTab();
   else content=renderTraceTab();
+  
   root.innerHTML=tabBar+content;
 }
 
-window.setTab=t=>{selTab=t;selN=null;render();}
-window.selectJ=id=>{selJ=selJ===id?null:id;selN=null;render();}
-window.selectNode=id=>{const n=NODES.find(x=>x.id===id);selN=selN&&selN.id===id?null:n;render();}
-window.closeSchema=()=>{selN=null;render();}
-window.setFilter=f=>{browseFilter=f;selN=null;render();}
+window.setTab=function(t){selTab=t;selN=null;render();}
+window.selectJ=function(id){selJ=selJ===id?null:id;selN=null;render();}
+window.selectNode=function(id){
+  const n=NODES.find(x=>x.id===id);
+  selN=selN&&selN.id===id?null:n;
+  render();
+}
+window.closeSchema=function(){selN=null;render();}
+window.setFilter=function(f){browseFilter=f;selN=null;render();}
 
 render();
 </script>
-</body>
-</html>
