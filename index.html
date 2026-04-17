@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Terra Journey Node Explorer</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #ffffff; --bg2: #f5f4f0; --bg3: #eeede9;
+    --text: #1c1c1a; --text2: #5f5e5a; --text3: #888780;
+    --border: rgba(0,0,0,0.12); --border2: rgba(0,0,0,0.22);
+    --radius: 8px; --radius-lg: 12px;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1c1a; --bg2: #252523; --bg3: #2e2e2b;
+      --text: #e8e6de; --text2: #9c9a92; --text3: #6b6a63;
+      --border: rgba(255,255,255,0.1); --border2: rgba(255,255,255,0.2);
+    }
+  }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; min-height: 100vh; }
+  .shell { max-width: 860px; margin: 0 auto; padding: 24px 20px 48px; }
+  .masthead { margin-bottom: 20px; }
+  .masthead h1 { font-size: 18px; font-weight: 500; }
+  .masthead p  { font-size: 12px; color: var(--text2); margin-top: 3px; }
+  .tabs { display: flex; gap: 4px; margin-bottom: 14px; border-bottom: 0.5px solid var(--border); padding-bottom: 10px; flex-wrap: wrap; }
+  .tab-btn { padding: 5px 14px; font-size: 12px; border-radius: var(--radius); border: 0.5px solid transparent; cursor: pointer; background: transparent; color: var(--text2); font-family: var(--font); transition: all 0.12s; }
+  .tab-btn.on { background: var(--bg2); border-color: var(--border2); color: var(--text); font-weight: 500; }
+  .tab-btn:hover:not(.on) { background: var(--bg2); }
+  .jchip { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px 10px; border-radius: var(--radius); cursor: pointer; min-width: 100px; transition: box-shadow 0.15s, transform 0.12s; user-select: none; border: 1.5px solid transparent; }
+  .jchip:hover { transform: translateY(-1px); }
+  .jchip.active { box-shadow: 0 0 0 2.5px currentColor; }
+  .arr { display: flex; align-items: center; color: var(--text2); font-size: 14px; padding: 0 4px; flex-shrink: 0; }
+  .ntag { display: inline-block; font-size: 10px; font-weight: 500; padding: 2px 7px; border-radius: 4px; cursor: pointer; transition: opacity 0.1s; border: 1px solid transparent; }
+  .ntag:hover { opacity: 0.8; }
+  .ntag.active { border-color: currentColor; }
+  .pill { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 12px; margin: 2px; line-height: 1.5; }
+  .schema-row { display: flex; gap: 0; border-bottom: 0.5px solid var(--border); }
+  .schema-row:last-child { border-bottom: none; }
+  .schema-label { font-size: 11px; font-weight: 500; width: 130px; min-width: 130px; padding: 8px 10px 8px 0; color: var(--text2); flex-shrink: 0; }
+  .schema-val { font-size: 12px; padding: 8px 0; color: var(--text); line-height: 1.6; flex: 1; }
+  .nc { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 10px 12px; cursor: pointer; transition: border-color 0.12s; }
+  .nc:hover { border-color: var(--border2); }
+  .nc.on { border-width: 1.5px; }
+  .par-band { border-radius: var(--radius); padding: 7px 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; margin-bottom: 4px; border: 1px solid transparent; transition: opacity 0.12s; }
+  .par-band:hover { opacity: 0.85; }
+  .par-band.on { border-color: currentColor; }
+  .node-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+  @media (max-width: 560px) { .node-grid { grid-template-columns: 1fr; } .jchip { min-width: 80px; } }
+  .timeline-bar { background: var(--bg2); border-radius: 4px; height: 8px; margin: 12px 0; position: relative; overflow: hidden; }
+  .timeline-dot { position: absolute; top: 0; height: 100%; width: 3px; transform: translateX(-50%); }
+  .trace-step { position: relative; padding-left: 16px; padding-bottom: 20px; }
+  .trace-step:last-child { padding-bottom: 0; }
+  .trace-connector { position: absolute; left: 5px; top: 16px; width: 1px; height: calc(100% - 4px); background: var(--border); }
+  .trace-dot { position: absolute; left: 0; top: 4px; width: 11px; height: 11px; border-radius: 50%; }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="masthead">
+    <h1>Terra Journey Node Explorer</h1>
+    <p>Perch · Terra Platform · All 8 journey layers · 26 nodes</p>
+  </div>
+  <div id="root"></div>
+</div>
+<script>
+const J={
+  L:{id:"L",name:"Lead-to-Opp",abbrev:"L1–L4",color:"#2D6A4F",bg:"#E8F5F0",tc:"#1B4332",desc:"Lead creation through opp creation"},
+  O:{id:"O",name:"Opportunity",abbrev:"O1–O5",color:"#6A4C93",bg:"#F0EBF8",tc:"#3E2070",desc:"Pipeline from opp to Closed Won"},
+  A:{id:"A",name:"Appointment",abbrev:"A1–A5",color:"#7427B5",bg:"#F2EAFF",tc:"#4A1882",desc:"Booking through sit/held outcome"},
+  S:{id:"S",name:"Sales",abbrev:"S1–S2",color:"#1565C0",bg:"#E3F2FD",tc:"#0D4A8E",desc:"Sale event through confirmation"},
+  R:{id:"R",name:"Retention",abbrev:"R1–R3",color:"#B71C1C",bg:"#FFEBEE",tc:"#7F1212",desc:"At-risk recovery and realization"},
+  D:{id:"D",name:"Dialer",abbrev:"D1–D3",color:"#37474F",bg:"#ECEFF1",tc:"#1C2B33",desc:"Parallel execution layer — all journeys"},
+  W:{id:"W",name:"WFM Layer",abbrev:"W1–W2",color:"#006064",bg:"#E0F7FA",tc:"#003C3F",desc:"Parallel capacity & effort layer"},
+};
+
+const NODES=[
+  {id:"L1.ENTRY",j:"L",name:"Lead Created",sub:"L1",
+   desc:"Cohort anchor for all downstream analysis. Every velocity metric — speed-to-lead, time-to-contact, lead-to-opp days — is measured from this point.",
+   kpis:["# Leads Created","Dialer-Eligible Rate","Lead-to-Dialer Lag","Duplicate Rate"],
+   ts:["lead_created_date","dialer_load_date","marketing_drop_date","web_submission_date"],
+   flags:["invalid_phone_flag","batch_lead_flag","dialer_eligible_flag","hold_out_flag","control_flag"],
+   up:"Marketing Journey",dn:"L1.MID.QUALIFIED → L2.ENTRY",
+   loop:"Reactivated customers re-enter here as new lead records from Retention RP campaigns."},
+  {id:"L2.ENTRY",j:"L",name:"Working Path Selection",sub:"L2",
+   desc:"Sales-qualified lead routed to dialer, assigned rep, direct mid-funnel, or delayed queue. This branching point determines the entire downstream execution model.",
+   kpis:["Working Path Distribution (%)","Routing Lag","Zero-Attempt Rate"],
+   ts:["routing_decision_date","dialer_load_date","hopper_entry_date"],
+   flags:["dialer_eligible_flag","dialer_vs_non_dialer","zero_attempt_flag"],
+   up:"L1.MID.QUALIFIED",dn:"L3.ENTRY (dialer) or L3.ENTRY (assigned rep)",
+   loop:"Assigned leads not progressing can be re-routed to dialer path."},
+  {id:"L3.FIRST_ATTEMPT",j:"L",name:"First Outreach Attempt",sub:"L3",
+   desc:"Speed-to-lead measurement point. Time from entry to first attempt is one of the strongest predictors of contact and conversion. Every minute of delay reduces reachability.",
+   kpis:["Speed-to-Lead (minutes/hours)","SLA Compliance Rate","First-Attempt Connect Rate","First-Attempt Contact Rate"],
+   ts:["first_attempt_date","first_autodial_attempt_date"],
+   flags:["sla_compliant_flag","first_connected_flag","first_contacted_flag","first_attempt_autodial_flag"],
+   up:"L3.ENTRY",dn:"L3.MID.SUBSEQUENT_ATTEMPTS or L3.MID.CONTACT",loop:""},
+  {id:"L3.CONTACT",j:"L",name:"Meaningful Contact Made",sub:"L3",
+   desc:"A meaningful conversation with the right party (decision-maker). Distinct from a connection. Contact is the pivotal moment where the business gets its chance to qualify the lead.",
+   kpis:["Contact Rate","Contacts per Connect","Contact-to-Opp Rate","First Contact Attempt #"],
+   ts:["first_contact_date"],
+   flags:["ever_contacted_flag","ever_connected_flag","duration_qualified_flag"],
+   up:"L3.MID.FIRST_ATTEMPT or SUBSEQUENT_ATTEMPTS",dn:"L4.ENTRY",loop:""},
+  {id:"L4.OPP_CREATED",j:"L",name:"Opportunity Created",sub:"L4",
+   desc:"Terminal success node of the Lead-to-Opp Journey and entry point of the Opportunity Journey. The most important conversion event in the lead funnel.",
+   kpis:["Lead-to-Opp Conversion Rate","Lead-to-Opp Days","Opps per Contact","Opp Creation Velocity"],
+   ts:["opportunity_created_date","lead_to_opp_days (derived)"],
+   flags:["opportunity_created_flag","eventual_sale_flag"],
+   up:"L4.ENTRY",dn:"Opportunity Journey O1.ENTRY",
+   loop:"Multiple opportunities can be created for the same lead over time. Lost opps can re-engage."},
+  {id:"O1.ENTRY",j:"O",name:"Opp Enters Pipeline",sub:"O1",
+   desc:"Opportunity created and enters active pipeline. Whether follow-up begins on schedule is the strongest early predictor of close rate. Zero-activity opps are the primary pipeline health gap.",
+   kpis:["# Opps Created","Pipeline Value","Immediate Loss Rate","Initial Stage Distribution"],
+   ts:["opportunity_created_date","first_followup_scheduled_date","first_post_opp_interaction_date"],
+   flags:["opportunity_created_flag","eventual_sale_flag","has_manual_followup_flag"],
+   up:"L4.EXIT.OPP_CREATED",dn:"O2.ENTRY or O5.ENTRY (no follow-up in SLA)",
+   loop:"Stalled opps entering recovery re-enter at a new follow-up cycle on the same record."},
+  {id:"O2.ENTRY",j:"O",name:"Active Working",sub:"O2",
+   desc:"Rep making follow-up contacts and advancing CRM stages toward a formal proposal. Follow-up discipline is the strongest lever here. Sub-journey ends when proposal is delivered.",
+   kpis:["Days to First Follow-Up","Total Post-Opp Calls","Follow-Up Contact Rate","Days Since Last Attempt"],
+   ts:["first_call_date","first_manual_call_date","next_scheduled_followup","last_contact_date"],
+   flags:["has_manual_followup","has_inbound_followup","has_auto_followup","has_batch_reengagement"],
+   up:"O1.ENTRY",dn:"O3.ENTRY (proposal) or O5.ENTRY (stalled)",
+   loop:"Re-engagement programs inject automated touches without creating new opp records."},
+  {id:"O3.ENTRY",j:"O",name:"Proposal Delivered",sub:"O3",
+   desc:"Formal proposal, quote, or contract in the prospect's hands. Evaluation and closing window begins. Time pressure, deadline proximity, and competitive dynamics are the dominant signals.",
+   kpis:["Proposal-to-Close Days","Proposal-to-Win Rate","Post-Proposal Follow-Up Adherence"],
+   ts:["proposal_delivered_date","close_date","target_close_date"],
+   flags:["proposal_delivered_flag","closed_won_flag","closed_lost_flag"],
+   up:"O2.ENTRY",dn:"O4.ENTRY (won) or O5.ENTRY (aged) or Closed Lost",
+   loop:"Aged proposals trigger recovery campaign → re-enters O3 as new follow-up cycle on same opp."},
+  {id:"O4.ENTRY",j:"O",name:"Sales Confirmed",sub:"O4",
+   desc:"Post-sale validation window — the true-up period during which cancellations, verification failures, or holds can reverse the sale. Critical for net revenue modeling and often overlooked in onboarding.",
+   kpis:["Post-Sale Reversal Rate","Days Sale to Confirmation","True-Up Window Length"],
+   ts:["sale_date","confirmation_date","reversal_date","retention_window_start"],
+   flags:["sale_confirmed_flag","sale_reversed_flag","within_trueup_window_flag"],
+   up:"O3.ENTRY (Closed Won)",dn:"Sales Journey S1.ENTRY or Retention R1.ENTRY (reversed)",
+   loop:"Reversed sales may re-enter Opp Journey or trigger save motion in Retention."},
+  {id:"O5.ENTRY",j:"O",name:"Stalled Recovery",sub:"O5",
+   desc:"Opportunities that stopped progressing — open but dormant. A structured re-engagement motion, not a terminal state. Rescues existing pipeline rather than starting fresh with a new lead.",
+   kpis:["Aged Opp Inventory","% Pipeline 30/60/90+ Days","Recovery Close Rate","Opp Age Distribution"],
+   ts:["last_activity_date","re_engagement_date","opportunity_created_date (for age)"],
+   flags:["stalled_opp_flag (derived: opp_age > threshold AND no recent activity)"],
+   up:"O1, O2, or O3 when stall threshold exceeded",dn:"O2.ENTRY (recovered) or Closed Lost",
+   loop:"Recovered opps re-enter O2 or O3 on same record with new dialer record and interaction cycle."},
+  {id:"A1.ENTRY",j:"A",name:"Appointment Created",sub:"A1",
+   desc:"Scheduled event created with a future date. Scheduling lag is critical for field-visit models — it determines the confirmation window. For B2B, this is the primary SDR success milestone.",
+   kpis:["# Appts/Meetings Created","Scheduling Lag (days)","Appointments per Contact","Same-Day Rate"],
+   ts:["appointment_created_date","scheduled_event_date"],
+   flags:["appointment_created_flag","is_reschedule_flag","booking_source_type"],
+   up:"L4.EXIT.APPT_CREATED or recovery/reactivation campaign",dn:"A2.ENTRY or A5.ENTRY (immediate cancel)",
+   loop:"Rescheduled appointments and reactivation (RP) campaigns create new A1 events on same customer."},
+  {id:"A2.ENTRY",j:"A",name:"Pre-Event Confirmation",sub:"A2",
+   desc:"Confirmation cycle protects appointments from no-show and cancellation. Not a side process — it is the primary explanatory layer for sit/show-rate performance. Unconfirmed appointments are materially more fragile.",
+   kpis:["Confirmation Rate","Confirmed vs Unconfirmed Sit Rate","Cancellation-at-Confirmation Rate"],
+   ts:["confirmation_attempt_date","confirmation_status_date"],
+   flags:["confirmed_flag","reschedule_requested_flag","cancelled_at_confirmation_flag"],
+   up:"A1.ENTRY",dn:"A3.ENTRY or A1.ENTRY (reschedule) or A5.ENTRY (cancelled)",
+   loop:"Reschedule requests create new A1 events. Cancellations trigger recovery (A5)."},
+  {id:"A3.ENTRY",j:"A",name:"Sit / Meeting Held",sub:"A3",
+   desc:"Event date arrives. The highest-value node in the appointment lifecycle — determines whether the downstream commercial conversation happens. Sit rate and show rate are the primary KPIs here.",
+   kpis:["Sit Rate / Show Rate","NAH / No-Show Rate","Confirmed vs Unconfirmed Sit Rate","Quote Rate"],
+   ts:["visit_date","quote_generated_date"],
+   flags:["sit_completed_flag","quoted_flag","nah_flag","no_show_flag"],
+   up:"A2.ENTRY (confirmed or unconfirmed)",dn:"A4.ENTRY (complete) or A5.ENTRY (NAH/no-show)",loop:""},
+  {id:"A4.ENTRY",j:"A",name:"Post-Event Outcome",sub:"A4",
+   desc:"Commercial outcome determined. Handoff from Appointment Journey to Opportunity or Sales Journey. Not all successful events produce an immediate outcome — some require a follow-up appointment.",
+   kpis:["Opp Creation Rate from Sits","Sale-at-Visit Rate","No-Outcome Rate","Meeting-to-Opp Days"],
+   ts:["visit_completion_date","opportunity_created_date (if applicable)"],
+   flags:["opp_created_from_visit_flag","sale_at_visit_flag","no_outcome_flag"],
+   up:"A3.ENTRY",dn:"Opp Journey O1 or Sales S1 or O5 (quote aging)",
+   loop:"Quote aging triggers Rehash campaign → may create new appointment (re-enters A1)."},
+  {id:"A5.ENTRY",j:"A",name:"NAH / Cancellation Recovery",sub:"A5",
+   desc:"Recovery lane for cancelled or NAH appointments. For field-visit models, a first-class operating motion with dedicated campaigns, attempt caps, and recycle rules. For B2B, informal SDR re-outreach.",
+   kpis:["Recovery Contact Rate","Recovery Rebook Rate","Recovery Sit Rate vs Original"],
+   ts:["cancellation_or_nah_date","recovery_load_date","recovery_rebook_date"],
+   flags:["is_reschedule_recovery_flag","recovery_success_flag","attempts_exhausted_flag"],
+   up:"A2.ENTRY (cancelled) or A3.ENTRY (NAH)",dn:"A1.ENTRY (new appointment) or end state",
+   loop:"Rescheduled appointment re-enters A1 → A2 → A3. If this also fails, may re-enter A5 again."},
+  {id:"S1.ENTRY",j:"S",name:"Sale Closed",sub:"S1",
+   desc:"Primary conversion event — sale closed, order submitted, contract signed. The most important downstream outcome of the entire funnel.",
+   kpis:["# Sales","Revenue per Sale","Sales Velocity (opp-to-sale days)","Full-Funnel Lead-to-Sale Days"],
+   ts:["sale_date","registration_date"],
+   flags:["sale_flag","confirmed_sale_flag"],
+   up:"Opportunity Journey O4.ENTRY",dn:"S1.EXIT.CONFIRMED or save motion (immediate cancel)",loop:""},
+  {id:"S1.CONFIRMED",j:"S",name:"Sale Confirmed",sub:"S1",
+   desc:"Sale passes validation. Payment confirmed, verification complete. Triggers retention window and fulfillment. This is when the sale is considered real and clean.",
+   kpis:["Confirmation Rate","Sale-to-Confirmation Lag","Immediate Failure Rate"],
+   ts:["confirmation_date","retention_window_start"],
+   flags:["sale_confirmed_flag"],
+   up:"S1.ENTRY",dn:"Retention R3.ENTRY or Sales S2.ENTRY (if install applies)",
+   loop:"Failed validation returns to Opp Journey or triggers save motion in Retention."},
+  {id:"S2.ENTRY",j:"S",name:"Install / Fulfillment",sub:"S2",
+   desc:"For businesses where a physical install or activation follows the sale. Covers from payment confirmation through to successful service delivery.",
+   kpis:["Install Completion Rate","Sale-to-Install Days","Install Cancellation Rate"],
+   ts:["install_scheduled_date","install_completed_date","install_cancelled_date"],
+   flags:["install_completed_flag","install_cancelled_flag"],
+   up:"S1.EXIT.CONFIRMED",dn:"Retention R3 (complete) or R1 (cancelled → save)",
+   loop:"Cancelled installs trigger save campaign. Recovered installs return here for completion."},
+  {id:"R1.ENTRY",j:"R",name:"At-Risk Signal",sub:"R1",
+   desc:"A sold customer enters a risk state — explicit cancellation request, install cancel, payment failure, or churn signal. Triggers the retention/save motion.",
+   kpis:["Cancellation Rate","Cancel Reasons Distribution","Sale Age at Cancel","At-Risk-to-Save Lag"],
+   ts:["cancel_request_date","payment_failure_date","save_campaign_load_date"],
+   flags:["cancel_pending_flag","at_risk_flag","payment_failure_flag"],
+   up:"Sales Journey S1 or S2",dn:"R2.ENTRY (save campaign) or immediate loss",
+   loop:"Recovered sales return to R3. Lost customers may re-enter L1 via reactivation (RP campaign)."},
+  {id:"R2.ENTRY",j:"R",name:"Retention Campaign",sub:"R2",
+   desc:"At-risk customer loaded into save campaign or assigned to retention specialist. Dialer and Retention Journeys overlap here. Has its own contact strategy, attempt caps, and success criteria.",
+   kpis:["Save Attempt Rate","Save Contact Rate","Save Success Rate","Talk Time on Retention Calls"],
+   ts:["campaign_load_date","first_save_attempt_date","save_resolution_date"],
+   flags:["save_campaign_flag","saved_flag","lost_confirmed_flag"],
+   up:"R1.ENTRY",dn:"R3.ENTRY (saved) or end state (churned)",
+   loop:"Saved customers return to R3. Exhausted records may enter a secondary save wave."},
+  {id:"R3.ENTRY",j:"R",name:"Revenue Realization",sub:"R3",
+   desc:"Sale in its retention monitoring period. Revenue is provisional until this window passes. Covers both saved sales and confirmed sales in their initial retention window.",
+   kpis:["Retention Rate","Window Cancellation Rate","Revenue Realized vs At-Risk","True-Up Adjustment Rate"],
+   ts:["retention_window_start","retention_window_end","cancellation_date (if cancelled)"],
+   flags:["retention_window_active_flag","passed_retention_flag","clawback_flag"],
+   up:"S1.EXIT.CONFIRMED or R2.EXIT.SAVED",dn:"R3.EXIT.REALIZED or R1.ENTRY (late churn)",
+   loop:"Fully realized customers may re-enter L1 as reactivation targets for additional products."},
+  {id:"D1.ENTRY",j:"D",name:"Record Loaded",sub:"D1",
+   desc:"Operational record loaded into dialer. The same entity creates multiple dialer records across different campaigns over its lifetime — lead, rehash, reschedule, reactivation, and save all produce new records.",
+   kpis:["# Records Loaded","Zero-Attempt Rate","Load-to-First-Attempt Lag"],
+   ts:["dialer_load_date","hopper_entry_date"],
+   flags:["zero_attempt_flag","dialer_eligible_flag"],
+   up:"Any journey requiring dialer outreach (lead, opp rehash, reschedule, RP, saves)",dn:"D2.MID.ATTEMPT_CYCLE",
+   loop:"This IS the re-entry point for most lifecycle re-loops: recovery, reschedule, RP, saves, recycle."},
+  {id:"D2.ATTEMPT",j:"D",name:"Attempt Cycle",sub:"D2",
+   desc:"Core execution loop: attempt → disposition → recycle decision → next attempt. Per-attempt tracking enables cadence compliance analysis, diminishing returns measurement, and agent performance evaluation.",
+   kpis:["Connect Rate by Attempt N","Contact Rate by Attempt N","Marginal Contact Rate","SLA Compliance Rate","Inter-Attempt Interval"],
+   ts:["attempt_N_date (each attempt)","last_attempt_date","callback_scheduled_date"],
+   flags:["attempt_N flags (made, autodial, connected, contacted, final_dispo, sla_compliant)","max_attempts_reached_flag"],
+   up:"D1.ENTRY",dn:"D2.EXIT.CONTACT or D2.EXIT.EXHAUSTED or D3.ENTRY (campaign move)",
+   loop:"Callbacks create scheduled re-entries. Campaign moves create new D1→D2 cycles with fresh caps."},
+  {id:"D3.ENTRY",j:"D",name:"Campaign Move",sub:"D3",
+   desc:"Record transitions from one dialer campaign to another. This is how entities route through different working motions: lead outreach → recovery → reschedule → save.",
+   kpis:["# Transitions by Source→Destination","Transition Lag","Cross-Campaign Conversion Rate"],
+   ts:["source_campaign_exit_date","destination_campaign_entry_date"],
+   flags:["campaign_transition_flag","motion_type"],
+   up:"D2.EXIT.EXHAUSTED or disposition trigger",dn:"D1.ENTRY (new campaign → new attempt cycle)",
+   loop:"This node IS the mechanism for all cross-journey re-loops. FC → Confirmations → Reschedules → Rehash → RP → Saves."},
+  {id:"W1.SCHEDULE",j:"W",name:"Agent Schedule",sub:"W1",
+   desc:"Planned agent hours by shift, team, and role. The denominator for all adherence calculations. Without schedule data you can report actual time but cannot measure adherence, gap, or efficiency loss.",
+   kpis:["Scheduled Hours per Agent per Day","Total Planned Capacity (agent-hours)","Schedule Coverage by Hour-of-Day"],
+   ts:["scheduled_login_time","scheduled_logout_time"],
+   flags:["scheduled_day_flag","shift_type"],
+   up:"HR / WFM Platform",dn:"W2.ACTIVITY (adherence comparison) → all journey execution layers",loop:""},
+  {id:"W2.ACTIVITY",j:"W",name:"Agent Activity Log",sub:"W2",
+   desc:"Time-stamped record of every agent state from login to logout — talk, wait, ACW, break, coaching, personal, system. Reveals how hours are distributed across productive and non-productive states.",
+   kpis:["Schedule Adherence Rate","Utilization Rate","Talk Time per Login Hour","ACW Rate","Payable Hours","Daily Overtime"],
+   ts:["login_time","logout_time","session_start","session_end","ib_opening_time","ib_closing_time"],
+   flags:["acw_over_threshold_flag","talk_under_threshold_flag","personal_over_threshold_flag","login_lag_flag","early_logout_flag","excess_break_flag"],
+   up:"Dialer / ACD system event logs",dn:"All journey execution layers (provides capacity context for interpreting throughput)",
+   loop:"None — WFM is a parallel layer. Its outputs contextualize journey metrics, not create journey events."},
+];
+
+let selTab="arch", selJ=null, selN=null, browseFilter="all";
+
+function jColor(id){return J[id]?.color||"#888"}
+function jBg(id){return J[id]?.bg||"#eee"}
+function jTc(id){return J[id]?.tc||"#333"}
+
+function renderSchema(node){
+  if(!node) return "";
+  const j=J[node.j];
+  const rows=[
+    ["Description",node.desc],
+    ["KPIs / Measures",node.kpis.join(" · ")],
+    ["Key Timestamps",node.ts.join(" · ")],
+    ["Flags & Indicators",node.flags.join(" · ")],
+    ["Upstream",node.up],
+    ["Downstream",node.dn],
+    ["Re-Loop Paths",node.loop||"No direct re-loops from this node."],
+  ];
+  return `<div style="border:1.5px solid ${j.color};border-radius:10px;overflow:hidden;margin-top:12px">
+    <div style="background:${j.color};padding:10px 14px;display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <span style="color:rgba(255,255,255,0.7);font-size:11px">${node.id} · ${j.name} Journey</span>
+        <div style="color:#fff;font-size:15px;font-weight:500;margin-top:2px">${node.name}</div>
+      </div>
+      <button onclick="closeSchema()" style="background:rgba(255,255,255,0.15);border:none;color:#fff;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:12px;font-family:inherit">✕ close</button>
+    </div>
+    <div style="background:var(--bg);padding:0 14px">
+      ${rows.map(([l,v])=>`<div class="schema-row"><div class="schema-label">${l}</div><div class="schema-val">${v}</div></div>`).join("")}
+    </div>
+  </div>`;
+}
+
+function renderNodeCards(nodes){
+  return nodes.map(n=>{
+    const isOn=selN&&selN.id===n.id;
+    const jc=J[n.j];
+    return `<div class="nc ${isOn?"on":""}" style="${isOn?`border-color:${jc.color}`:""}" onclick="selectNode('${n.id}')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+        <div>
+          <span style="font-size:10px;font-weight:500;color:${jc.color}">${n.id}</span>
+          <div style="font-size:13px;font-weight:500;margin-top:2px;color:var(--text)">${n.name}</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:3px">${n.sub} · ${J[n.j].name}</div>
+        </div>
+        <span class="pill" style="background:${jc.bg};color:${jc.tc};font-size:10px;white-space:nowrap">${n.j}</span>
+      </div>
+      <div style="font-size:11px;color:var(--text2);margin-top:6px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${n.desc}</div>
+    </div>`;
+  }).join("");
+}
+
+function renderArchTab(){
+  const primaryFlow=["L","O","S","R"];
+  const chips=primaryFlow.map((id,i)=>{
+    const jm=J[id]; const on=selJ===id;
+    return `<div class="jchip ${on?"active":""}" style="background:${jm.bg};color:${jm.tc};border-color:${on?jm.color:"transparent"};min-width:100px" onclick="selectJ('${id}')">
+      <span style="font-size:10px;opacity:0.7">${jm.abbrev}</span>
+      <span style="font-size:12px;font-weight:500;margin-top:2px">${jm.name}</span>
+      <span style="font-size:10px;margin-top:1px;opacity:0.6">${NODES.filter(n=>n.j===id).length} nodes</span>
+    </div>${i<primaryFlow.length-1?'<div class="arr">→</div>':''}`;
+  }).join("");
+
+  const jA=J["A"]; const aOn=selJ==="A";
+  const apptRow=`<div style="display:flex;align-items:center;gap:6px;margin-top:6px;padding-left:36px">
+    <div style="width:1px;height:24px;background:var(--border)"></div>
+    <div class="arr" style="transform:rotate(90deg)">→</div>
+    <div class="jchip ${aOn?"active":""}" style="background:${jA.bg};color:${jA.tc};border-color:${aOn?jA.color:"transparent"};min-width:100px" onclick="selectJ('A')">
+      <span style="font-size:10px;opacity:0.7">${jA.abbrev}</span>
+      <span style="font-size:12px;font-weight:500;margin-top:2px">${jA.name}</span>
+      <span style="font-size:10px;margin-top:1px;opacity:0.6">${NODES.filter(n=>n.j==="A").length} nodes</span>
+    </div>
+    <div style="font-size:11px;color:var(--text2)">(branches from L4 · field visit or B2B meeting model)</div>
+  </div>`;
+
+  const parallelRows=["D","W"].map(id=>{
+    const jm=J[id]; const on=selJ===id;
+    return `<div class="par-band ${on?"on":""}" style="background:${jm.bg};color:${jm.tc};border-color:${on?jm.color:"transparent"}" onclick="selectJ('${id}')">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:11px;font-weight:500">${jm.name}</span>
+        <span style="font-size:10px;opacity:0.6">${jm.abbrev} · ${NODES.filter(n=>n.j===id).length} nodes · ${jm.desc}</span>
+      </div>
+      <span class="pill" style="background:${jm.color};color:#fff;font-size:10px">${on?"selected":"click to explore"}</span>
+    </div>`;
+  }).join("");
+
+  let nodeSection="";
+  if(selJ){
+    const jNodes=NODES.filter(n=>n.j===selJ);
+    const jm=J[selJ];
+    const tags=jNodes.map(n=>{
+      const on=selN&&selN.id===n.id;
+      return `<span class="ntag ${on?"active":""}" style="background:${on?jm.color:jm.bg};color:${on?"#fff":jm.tc};border-color:${jm.color}" onclick="selectNode('${n.id}')">${n.name}</span>`;
+    }).join("");
+    nodeSection=`<div style="margin-top:14px;padding:12px;background:var(--bg2);border-radius:8px;border:0.5px solid var(--border)">
+      <div style="font-size:11px;color:var(--text2);margin-bottom:8px">${jm.name} Journey · ${jNodes.length} nodes · click a node to see its schema</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">${tags}</div>
+    </div>`;
+  }
+
+  const schemaSection=selN?renderSchema(selN):"";
+
+  return `<div>
+    <div style="font-size:11px;color:var(--text2);margin-bottom:8px">Primary journey pipeline</div>
+    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px">${chips}</div>
+    ${apptRow}
+    <div style="font-size:11px;color:var(--text2);margin:12px 0 6px">Parallel layers (span all journeys)</div>
+    ${parallelRows}
+    ${nodeSection}
+    ${schemaSection}
+  </div>`;
+}
+
+function renderBrowseTab(){
+  const filters=["all",...Object.keys(J)];
+  const filterBtns=filters.map(f=>`<button class="tab-btn ${browseFilter===f?"on":""}" onclick="setFilter('${f}')">${f==="all"?"All journeys":J[f]?.name||f}</button>`).join("");
+  let visible=browseFilter==="all"?NODES:NODES.filter(n=>n.j===browseFilter);
+  const grid=`<div class="node-grid">${renderNodeCards(visible)}</div>`;
+  const schema=selN?renderSchema(selN):"";
+  return `<div>
+    <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:4px">${filterBtns}</div>
+    <div style="font-size:11px;color:var(--text2);margin-bottom:8px">${visible.length} nodes · click any card to view full schema</div>
+    ${grid}
+    ${schema}
+  </div>`;
+}
+
+function renderTraceTab(){
+  const trace=[
+    {j:"L",id:"L1.ENTRY",label:"Lead Created",day:0,note:"CRM lead created from web form. Dialer-eligible flag set immediately."},
+    {j:"L",id:"L3.FIRST_ATTEMPT",label:"First Attempt",day:0.2,note:"Speed-to-lead: 12 minutes. Auto-dialed within SLA window."},
+    {j:"L",id:"L3.CONTACT",label:"Contact Made",day:3,note:"DM reached on attempt 4. Qualification conversation completed."},
+    {j:"L",id:"L4.OPP_CREATED",label:"Opp Created",day:3,note:"Enrollment stage set. Advisor assigned. Follow-up scheduled."},
+    {j:"O",id:"O2.ENTRY",label:"Active Working",day:5,note:"3 manual calls in 5 days. First contact post-opp: day 1."},
+    {j:"O",id:"O3.ENTRY",label:"Proposal Sent",day:12,note:"Enrollment terms shared. Deadline 18 days out."},
+    {j:"O",id:"O4.ENTRY",label:"Closed Won",day:17,note:"Opp-to-sale: 14 days. Before enrollment deadline."},
+    {j:"S",id:"S1.CONFIRMED",label:"Confirmed",day:18,note:"Verification completed. True-up window started."},
+    {j:"R",id:"R3.ENTRY",label:"Realization",day:48,note:"True-up window passed. Revenue realized. No cancellation."},
+  ];
+  const totalDays=48;
+  const tlDots=trace.map(s=>`<div class="timeline-dot" style="left:${Math.round(s.day/totalDays*100)}%;background:${J[s.j].color}"></div>`).join("");
+  const steps=trace.map((s,i)=>{
+    const jm=J[s.j];
+    return `<div class="trace-step">
+      ${i<trace.length-1?`<div class="trace-connector"></div>`:""}
+      <div class="trace-dot" style="background:${jm.color}"></div>
+      <div style="display:flex;align-items:baseline;gap:8px">
+        <span style="font-size:11px;font-weight:500;color:${jm.color}">${s.label}</span>
+        <span style="font-size:10px;color:var(--text2)">day ${s.day===0?"0":s.day}</span>
+        <span class="pill" style="background:${jm.bg};color:${jm.tc};font-size:9px">${s.j} journey</span>
+      </div>
+      <div style="font-size:11px;color:var(--text2);margin-top:2px">${s.note}</div>
+    </div>`;
+  }).join("");
+  return `<div>
+    <div style="font-size:11px;color:var(--text2);margin-bottom:6px">Example lifecycle trace — single lead through all journeys (illustrative timing)</div>
+    <div class="timeline-bar">${tlDots}</div>
+    <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text2);margin-bottom:14px">
+      <span>Day 0 · Lead Created</span><span>Day 48 · Realized</span>
+    </div>
+    <div>${steps}</div>
+  </div>`;
+}
+
+function render(){
+  const root=document.getElementById("root");
+  const tabs=[["arch","Journey Architecture"],["browse","Node Schema Browser"],["trace","Lifecycle Trace"]];
+  const tabBar=`<div class="tabs">
+    ${tabs.map(([id,label])=>`<button class="tab-btn ${selTab===id?"on":""}" onclick="setTab('${id}')">${label}</button>`).join("")}
+  </div>`;
+  let content="";
+  if(selTab==="arch") content=renderArchTab();
+  else if(selTab==="browse") content=renderBrowseTab();
+  else content=renderTraceTab();
+  root.innerHTML=tabBar+content;
+}
+
+window.setTab=t=>{selTab=t;selN=null;render();}
+window.selectJ=id=>{selJ=selJ===id?null:id;selN=null;render();}
+window.selectNode=id=>{const n=NODES.find(x=>x.id===id);selN=selN&&selN.id===id?null:n;render();}
+window.closeSchema=()=>{selN=null;render();}
+window.setFilter=f=>{browseFilter=f;selN=null;render();}
+
+render();
+</script>
+</body>
+</html>
